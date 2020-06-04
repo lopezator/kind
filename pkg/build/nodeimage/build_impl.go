@@ -277,7 +277,17 @@ func (c *buildContext) prePullImages(dir, containerID string) ([]string, error) 
 		c.logger.Errorf("Image build Failed! Failed write default CNI Manifest: %v", err)
 		return nil, err
 	}
+
+	// write the sealed-secrets manifest
+	if err := createFile(cmder, defaultSealedSecretsManifestLocation, defaultSealedSecretsManifest); err != nil {
+		c.logger.Errorf("Image build Failed! Failed write default sealed-secrets Manifest: %v", err)
+		return nil, err
+	}
+
 	// all builds should install the default CNI images from the above manifest currently
+	var images []string
+	images = append(images, defaultCNIImages...)
+	images = append(images, defaultSealedSecretsImages...)
 	requiredImages = append(requiredImages, defaultCNIImages...)
 
 	// write the default Storage manifest

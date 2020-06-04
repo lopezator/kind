@@ -23,7 +23,8 @@ import (
 	"time"
 
 	"github.com/alessio/shellescape"
-
+	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/installsealedsecrets"
+	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/waitforsealedsecretsready"
 	"sigs.k8s.io/kind/pkg/cluster/internal/delete"
 	"sigs.k8s.io/kind/pkg/cluster/internal/providers/provider"
 	"sigs.k8s.io/kind/pkg/errors"
@@ -133,9 +134,11 @@ func Cluster(logger log.Logger, p provider.Provider, opts *ClusterOptions) error
 		}
 		// add remaining steps
 		actionsToRun = append(actionsToRun,
-			installstorage.NewAction(),                // install StorageClass
-			kubeadmjoin.NewAction(),                   // run kubeadm join
-			waitforready.NewAction(opts.WaitForReady), // wait for cluster readiness
+			installsealedsecrets.NewAction(),                       // install sealed-secrets
+			waitforsealedsecretsready.NewAction(opts.WaitForReady), // wait for sealed-secrets readiness
+			installstorage.NewAction(),                             // install StorageClass
+			kubeadmjoin.NewAction(),                                // run kubeadm join
+			waitforready.NewAction(opts.WaitForReady),              // wait for cluster readiness
 		)
 	}
 
